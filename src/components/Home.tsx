@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Download } from "lucide-react";
+import { toPng } from "html-to-image";
 
 interface Color {
   name: string;
@@ -27,7 +28,7 @@ export default function CardGenerator() {
     { name: "beige", value: "#f5f0e8" },
   ];
 
-  const downloadCard = async (): Promise<void> => {
+  const downloadCard2 = async (): Promise<void> => {
     const card = cardRef.current;
     if (!card) return;
 
@@ -113,6 +114,20 @@ export default function CardGenerator() {
     );
   };
 
+  const downloadCard = async () => {
+    if (!cardRef.current) return;
+
+    const dataUrl = await toPng(cardRef.current, {
+      pixelRatio: 3, // HIGH QUALITY
+      cacheBust: true,
+    });
+
+    const link = document.createElement("a");
+    link.download = "card.png";
+    link.href = dataUrl;
+    link.click();
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-4xl">
@@ -133,10 +148,10 @@ export default function CardGenerator() {
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Write something meaningful..."
                 className="w-full h-24 p-4 border border-neutral-200 rounded-none focus:outline-none focus:border-neutral-400 resize-none text-neutral-800 placeholder-neutral-300 text-base md:text-lg font-light transition-colors"
-                maxLength={200}
+                maxLength={600}
               />
               <div className="text-xs text-neutral-400 mt-2 text-right font-light">
-                {text.length}/200
+                {text.length}/600
               </div>
             </div>
 
@@ -200,32 +215,27 @@ export default function CardGenerator() {
               </div>
             </div>
 
-            {/* FONT SIZE FIELD ADDED */}
             <div>
               <label className="block text-sm text-neutral-600 mb-3 font-light">
                 Font size
               </label>
-              <div className="flex gap-4">
-                {[12, 24, 48].map((size) => (
-                  <label
-                    key={size}
-                    className="flex items-center gap-2 cursor-pointer group"
-                  >
-                    <input
-                      type="radio"
-                      name="fontSizeOption"
-                      value={size}
-                      checked={fontSizeOption === size}
-                      onChange={(e) =>
-                        setFontSizeOption(parseInt(e.target.value) as FontSize)
-                      }
-                      className="w-3.5 h-3.5 text-neutral-800 border-neutral-300 focus:ring-1 focus:ring-neutral-400 cursor-pointer"
-                    />
-                    <span className="text-sm text-neutral-600 font-light group-hover:text-neutral-800 transition-colors">
-                      {size}px
-                    </span>
-                  </label>
-                ))}
+
+              <div className="flex items-center gap-4">
+                <input
+                  type="range"
+                  min="12"
+                  max="64"
+                  step="1"
+                  value={fontSizeOption}
+                  onChange={(e) =>
+                    setFontSizeOption(parseInt(e.target.value) as FontSize)
+                  }
+                  className="w-full cursor-pointer"
+                />
+
+                <span className="text-sm text-neutral-700 font-light">
+                  {fontSizeOption}px
+                </span>
               </div>
             </div>
 
